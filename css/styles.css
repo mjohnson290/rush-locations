@@ -1,0 +1,126 @@
+@font-face {
+  font-family: "Trade Gothic";
+  src: url("../assets/fonts/Trade\ Gothic.woff2") format("woff2"),
+    url("../assets/fonts/Trade\ Gothic.woff") format("woff"),
+    url("../assets/fonts/Trade\ Gothic.ttf") format("ttf");
+}
+
+@font-face {
+  font-family: "Trade Gothic Condensed";
+  src: url("../assets/fonts/Trade\ Gothic\ Condensed.woff2") format("woff2"),
+    url("../assets/fonts/Trade\ Gothic\ Condensed.woff") format("woff"),
+    url("../assets/fonts/Trade\ Gothic\ Condensed.ttf") format("ttf"),
+    url("../assets/fonts/Trade\ Gothic\ Condensed.eot") format("eot");
+    /* src: url("../assets/fonts/TradeGothicLT-CondEighteen.ttf"); */
+}
+
+@font-face {
+  font-family: "Trade Gothic Bold Condensed";
+  src: url("../assets/fonts/Trade\ Gothic\ Bold\ Condensed.woff2") format("woff2"),
+    url("../assets/fonts/Trade\ Gothic\ Bold\ Condensed.woff") format("woff"),
+    url("../assets/fonts/Trade\ Gothic\ Bold\ Condensed.ttf") format("ttf"),
+    url("../assets/fonts/Trade\ Gothic\ Bold\ Condensed.eot") format("eot");
+}
+
+@font-face {
+  font-family: "Warnock";
+  src: url("../assets/fonts/WarnockPro-Regular.otf");
+}
+
+@font-face {
+  font-family: "Warnock Bold";
+  src: url("../assets/fonts/WarnockPro-Bold.otf");
+}
+
+@font-face {
+  font-family: "Warnock Disp";
+  src: url("../assets/fonts/WarnockPro-Disp.otf");
+}
+
+
+.container {
+  width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  font-family: 'Trade Gothic Condensed', sans-serif;
+  margin: 0 auto;
+}
+
+.side-panel {
+  width: 400px;
+  height: 400px;
+  overflow: scroll;
+  background: #ddd;
+  padding: 0 10px;
+}
+
+.map {
+  width: 600px;
+  height: 400px;
+}
+
+.map__result {
+  margin: 20px 0;
+  background-color: #fff;
+  padding: 15px;
+}
+
+.map__infobox {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px 15px;
+}
+
+.map__infobox__title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.map__description {
+  font-family: 'Trade Gothic Condensed', sans-serif;
+  padding: 0px;
+}
+
+.map__description__title {
+  font-family: 'Trade Gothic Bold Condensed', sans-serif;
+  font-size: 18px;
+  color: #111;
+}
+
+.map__description__address,
+.map__description__phone {
+  margin: 10px 0;
+}
+
+.map__description__services {
+  margin: 20px 0;
+}
+
+.map__description__services__header {
+  font-weight: bold;
+}
+
+.map__description__services__service,
+.map__description__services__offered {
+  
+  display: inline-block;
+}
+
+.map__description__services__service {
+  text-align: left;
+  width: 50%;
+}
+
+.map__description__services__offered {
+  text-align: center;
+  width: 30%;
+  padding-left: 10px;
+}
+
+#myMap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}

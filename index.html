@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rush Locations</title>
+    <script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol?key=Ai6Wqz6EzFaqDKWV7iiiPcAQ78oLlYIS38oJXl4OqSjd0KHmyHGZ3bpWAkGKPSSO" async defer></script>
+
+    <link rel="stylesheet" href="css/styles.css">
+  </head>
+  <body onload="GetMap();">
+    <div class="container">
+        <div class="side-panel">
+            <div id="searchBoxContainer" class="searchBar">
+                <input id="searchBox" type="text" value="Seattle" />
+                <input id="searchBtn" type="button" value="Search" />
+            </div>
+            <div class="filters">
+              <form>
+                <fieldset><input type="checkbox" id="services_newSales" value="services_newSales" /> <label for="services_newSales">New Sales</label></fieldset>
+                <fieldset><input type="checkbox" id="services_usedSales" value="services_usedSales" /> <label for="services_usedSales">Used Sales</label></fieldset>
+                <fieldset><input type="checkbox" id="services_busSales" value="services_busSales" /> <label for="services_busSales">Bus Sales</label></fieldset>
+                <fieldset><input type="checkbox" id="services_refuseSales" value="services_refuseSales" /> <label for="services_refuseSales">Refuse Sales</label></fieldset>
+                <button type="button" onclick="applyFilters()">Apply Filters</button>
+              </form>
+            </div>
+            <div id="resultsPanel"></div>
+        </div>
+      <div class="map">
+        <div id="myMap"></div>
+      </div>
+    </div>
+    <script type="text/javascript">
+      const locations = [
+{
+title: 'Rush Truck Center – Orlando',
+address: '1925 W. Princeton St, Orlando, Florida',
+city: 'Orlando',
+state: 'Florida',
+services: 'New Sales,Used Sales,Bus Sales,Refuse Sales,Crane Sales,Car Hauler Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,Natural Gas Service,Oil & Coolant Analysis,DPF Cleaning,Finance,Insurance',
+certifications: 'Peterbilt,Cummins,CAT,PACCAR MX,Peterbilt Rapid Check,Isuzu',
+contact: 'local:1-321-221-2300,tollfree:800-775-7383,parts:1-321-221-2330,service:1-321-221-2360,sales:1-321-221-2310,fax:321-221-2408',
+lat: '28.571812',
+long: '-81.408882'
+},
+{
+title: 'Rush Bus Center – Atlanta',
+address: '1644 Market Dr S.E., Atlanta, Georgia',
+city: 'Atlanta',
+state: 'Georgia',
+services: 'New Sales,Used Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,Natural Gas Service,Oil & Coolant Analysis,DPF Cleaning,Finance,Insurance',
+certifications: 'Allison,Cummins,CAT,International,Maxxforce,Hino,Isuzu,Eaton',
+contact: 'local:1-404-212-5900,fax:404-212-5903',
+lat: '29.480320',
+long: '-98.394302'
+},
+{
+title: 'Rush Truck Center – Boise',
+address: '770 W. Amity RD., Boise, Idaho',
+city: 'Boise',
+state: 'Idaho',
+services: 'New Sales,Used Sales,Bus Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,DPF Cleaning,Collision,Finance,Leasing & Rental,Insurance',
+certifications: 'Allison,Cummins,CAT,International,Maxxforce,Hino,Fuso,Eaton',
+contact: 'local:1-208-401-2200,tollfree:800-541-3645,parts:1-208-401-2220,service:1-208-401-2240,sales:1-208-401-2210,fax:208-345-4618',
+lat: '43.561653',
+long: '-116.191032'
+},
+{
+title: 'Rush Truck Center – Akron',
+address: '2697 Gilchrist Rd., Akron, Ohio',
+city: 'Akron',
+state: 'Ohio',
+services: 'New Sales,Used Sales,Bus Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,Insurance',
+certifications: 'Allison,Cummins,CAT,International,Maxxforce',
+contact: 'local:1-234-231-7600,tollfree:800-441-2000,parts:1-234-231-7620,service:1-234-231-7640,sales:1-234-231-7610,fax:234-231-7699',
+lat: '41.065056',
+long: '-81.427719'
+},
+{
+title: 'Rush Truck Center – Columbus',
+address: '3950 Parkwest Dr, Columbus, Ohio',
+city: 'Columbus',
+state: 'Ohio',
+services: 'New Sales,Used Sales,Bus Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,Natural Gas Service,DPF Cleaning,Finance,Graphics',
+certifications: 'Allison,Cummins,CAT,International,Maxxforce,Isuzu',
+contact: 'local:1-614-541-4500,tollfree:800-331-5035,parts:1-614-541-4550,service:1-614-541-4610,sales:1-614-541-4520,fax:614-541-4675',
+lat: '39.966746',
+long: '-83.113717'
+},
+{
+title: 'Rush Truck Center – Abilene',
+address: '326 North Access Rd I-20, Tye, Texas',
+city: 'Tye',
+state: 'Texas',
+services: 'New Sales,Used Sales,Parts,Rapid Parts,Service,Mobile Service,Natural Gas Service,DPF Cleaning,Leasing & Rental,Insurance',
+certifications: 'Peterbilt,Cummins,CAT,PACCAR MX,Peterbilt Rapid Check',
+contact: 'local:1-325-795-4600,tollfree:800-542-7750,parts:1-325-795-4630,service:1-325-795-4640,sales:1-325-795-4660,fax:325-692-0954',
+lat: '32.460196',
+long: '-99.865217'
+},
+{
+title: 'Rush Truck Center – Austin',
+address: '16870 South IH 35 , Buda, Texas',
+city: 'Buda',
+state: 'Texas',
+services: 'New Sales,Used Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,Natural Gas Service,DPF Cleaning',
+certifications: 'Peterbilt,Cummins,CAT,PACCAR MX,Peterbilt Rapid Check,Hino,Isuzu',
+contact: 'local:1-512-523-3200,tollfree:888-243-6241,parts:1-512-523-3130,service:1-512-523-3160,sales:1-512-523-3140,fax:512-523-3137',
+lat: '30.061599',
+long: '-97.833163'
+},
+{
+title: 'Rush Truck Center – Dallas',
+address: '515 North Loop 12 (515 N. Walton Walker Blvd), Irving, Texas',
+city: 'Irving',
+state: 'Texas',
+services: 'New Sales,Used Sales,Bus Sales,Refuse Sales,Crane Sales,Car Hauler Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,Natural Gas Service,Oil & Coolant Analysis,DPF Cleaning,Collision,Finance,Graphics,Leasing & Rental,Insurance',
+certifications: 'Peterbilt,Allison,Cummins,CAT,PACCAR MX,Peterbilt Rapid Check',
+contact: 'local:1-469-706-5200,tollfree:800-256-7383,parts:1-469-706-5300,service:1-469-706-5400,sales:1-469-706-5220,fax:469-706-5494',
+lat: '32.819153',
+long: '-96.923039'
+},
+{
+title: 'Rush Truck Center – Dallas Medium-Duty',
+address: '4200 Irving Blvd, Dallas, Texas',
+city: 'Dallas',
+state: 'Texas',
+services: 'New Sales,Used Sales,Bus Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,DPF Cleaning,Finance',
+certifications: 'Peterbilt,Allison,Cummins,CAT,PACCAR MX,Peterbilt Rapid Check,Hino',
+contact: 'local:1-214-624-9100,tollfree:866-905-4466,parts:1-214-624-9140,service:1-214-624-9160,fax:214-624-9199',
+lat: '32.807412',
+long: '-96.888122'
+},
+{
+title: 'Rush Truck Center – El Paso',
+address: '12253 Gateway East, El Paso, Texas',
+city: 'El Paso',
+state: 'Texas',
+services: 'New Sales,Used Sales,Bus Sales,Refuse Sales,Crane Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,Oil & Coolant Analysis,DPF Cleaning,Collision,Finance,Leasing & Rental,Insurance',
+certifications: 'Peterbilt,Allison,Cummins,CAT,PACCAR MX,Peterbilt Rapid Check,Hino,Isuzu',
+contact: 'local:1-915-775-6300,tollfree:800-874-8785,parts:1-915-775-6340,service:1-915-775-6350,fax:915-772-4117',
+lat: '31.708820',
+long: '-106.290718'
+},
+{
+title: 'Rush Truck Center – Fort Worth',
+address: '1480 NE Loop 820, Ft Worth, Texas',
+city: 'Ft Worth',
+state: 'Texas',
+services: 'New Sales,Used Sales,Bus Sales,Refuse Sales,Crane Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,Natural Gas Service,Oil & Coolant Analysis,DPF Cleaning,Finance,Insurance',
+certifications: 'Peterbilt,Allison,Cummins,CAT,PACCAR MX,Peterbilt Rapid Check',
+contact: 'local:1-817-740-4900,tollfree:800-456-5229,parts:1-817-740-4960,service:1-817-740-4940,fax:817-740-4999',
+lat: '32.841078',
+long: '-97.335503'
+},
+{
+title: 'Rush Truck Center – Houston',
+address: '10200 North Loop East, Houston, Texas',
+city: 'Houston',
+state: 'Texas',
+services: 'New Sales,Used Sales,Bus Sales,Refuse Sales,Crane Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,Natural Gas Service,Oil & Coolant Analysis,DPF Cleaning,Collision,Finance,Graphics,Leasing & Rental,Insurance',
+certifications: 'Peterbilt,Allison,Cummins,CAT,PACCAR MX,Peterbilt Rapid Check,Hino',
+contact: 'local:1-832-690-5000,tollfree:800-580-7383,parts:1-832-690-5100,service:1-832-690-5200,sales:1-832-690-5040,fax:832-690-5289',
+lat: '29.782335',
+long: '-95.266846'
+},
+{
+title: 'Rush Truck Center – Laredo',
+address: '10216 Union Pacific Blvd, Laredo, Texas',
+city: 'Laredo',
+state: 'Texas',
+services: 'New Sales,Used Sales,Bus Sales,Refuse Sales,Crane Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,Natural Gas Service,Oil & Coolant Analysis,DPF Cleaning,Collision,Finance,Leasing & Rental,Insurance',
+certifications: 'Peterbilt,Allison,Cummins,CAT,PACCAR MX,Peterbilt Rapid Check,Hino',
+contact: 'local:1-956-764-1400,tollfree:800-259-1738,parts:1-956-764-1460,service:1-956-764-1440,fax:956-717-1709',
+lat: '27.613739',
+long: '-99.490944'
+},
+{
+title: 'Rush Truck Center – Lufkin',
+address: '3901 N. Medford Dr, Lufkin, Texas',
+city: 'Lufkin',
+state: 'Texas',
+services: 'New Sales,Used Sales,Bus Sales,Refuse Sales,Crane Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,Natural Gas Service,Oil & Coolant Analysis,DPF Cleaning,Collision,Finance,Insurance',
+certifications: 'Peterbilt,Allison,Cummins,CAT,PACCAR MX,Peterbilt Rapid Check',
+contact: 'local:1-936-630-2500,tollfree:800-259-5738,parts:1-936-630-2520,service:1-936-630-2550,sales:1-936-630-2510,fax:936-630-2599',
+lat: '31.366349',
+long: '-94.704685'
+},
+{
+title: 'Rush Truck Center – Pharr',
+address: '4700 N. Cage Blvd, Pharr, Texas',
+city: 'Pharr',
+state: 'Texas',
+services: 'New Sales,Used Sales,Bus Sales,Refuse Sales,Crane Sales,Car Hauler Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,Oil & Coolant Analysis,DPF Cleaning,Collision,Finance',
+certifications: 'Peterbilt,Allison,Cummins,CAT,PACCAR MX,Peterbilt Rapid Check,Hino,Isuzu',
+contact: 'local:1-956-784-7900,tollfree:888-901-7383,parts:1-956-784-7960,service:1-956-784-7940,fax:956-782-8822',
+lat: '26.235022',
+long: '-98.175209'
+},
+{
+title: 'Rush Truck Center – San Antonio',
+address: '8922 IH 10 East, Converse, Texas',
+city: 'Converse',
+state: 'Texas',
+services: 'New Sales,Used Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,Natural Gas Service,Oil & Coolant Analysis,DPF Cleaning,Collision,Finance,Insurance',
+certifications: 'Peterbilt,Allison,Cummins,CAT,PACCAR MX,Peterbilt Rapid Check,Hino',
+contact: 'local:1-210-901-7100,tollfree:800-299-7382,parts:1-210-901-7130,service:1-210-901-7170,sales:1-210-901-7110,fax:210-901-7275',
+lat: '29.458826',
+long: '-98.314582'
+},
+{
+title: 'Rush Truck Center – Sealy',
+address: '4606 NE I-10 Frontage Rd, Sealy, Texas',
+city: 'Sealy',
+state: 'Texas',
+services: 'New Sales,Used Sales,Refuse Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,DPF Cleaning,Finance',
+certifications: 'Peterbilt,Allison,Cummins,CAT,PACCAR MX,Peterbilt Rapid Check,Isuzu',
+contact: 'local:1-979-256-4930,tollfree:888-869-6197,parts:1-979-256-4950,service:1-979-256-4970,sales:1-979-256-4940,fax:979-877-0229',
+lat: '29.777683',
+long: '-96.114685'
+},
+{
+title: 'Rush Truck Center – Texarkana',
+address: '1931 N. Kings Hwy, Nash, Texas',
+city: 'Nash',
+state: 'Texas',
+services: 'New Sales,Used Sales,Bus Sales,Refuse Sales,Crane Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,DPF Cleaning,Finance',
+certifications: 'Peterbilt,Allison,Cummins,CAT,PACCAR MX,Peterbilt Rapid Check,Hino,Isuzu',
+contact: 'local:1-903-336-6800,tollfree:800-954-6717,parts:1-903-336-6820,service:1-903-336-6860,sales:1-903-336-6810,fax:903-838-8754',
+lat: '33.454010',
+long: '-94.130791'
+},
+{
+title: 'Rush Truck Center – Tyler',
+address: '11042 Hwy 69 N., Tyler, Texas',
+city: 'Tyler',
+state: 'Texas',
+services: 'New Sales,Used Sales,Bus Sales,Refuse Sales,Crane Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,Oil & Coolant Analysis,DPF Cleaning,Finance,Insurance',
+certifications: 'Peterbilt,Allison,Cummins,CAT,PACCAR MX,Peterbilt Rapid Check',
+contact: 'local:1-903-617-2500,tollfree:800-825-4799,parts:1-903-617-2520,service:1-903-617-2550,sales:1-903-617-2510,fax:903-617-2599',
+lat: '32.426968',
+long: '-95.360649'
+},
+{
+title: 'Rush Truck Center – Waco',
+address: '3200 IH 35 South (3200 S. Jack Kultgen Expy), Waco, Texas',
+city: 'Waco',
+state: 'Texas',
+services: 'New Sales,Used Sales,Bus Sales,Refuse Sales,Crane Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,Oil & Coolant Analysis,DPF Cleaning,Finance,Insurance',
+certifications: 'Peterbilt,Allison,Cummins,CAT,PACCAR MX,Peterbilt Rapid Check,Hino,Isuzu',
+contact: 'local:1-254-662-7900,tollfree:800-274-1988,parts:1-254-662-7960,service:1-254-662-7940,sales:1-254-662-7910,fax:254-662-7999',
+lat: '31.518721',
+long: '-97.135468'
+},
+{
+title: 'Rush Truck Center – Salt Lake City',
+address: '964 South 3800 West, Salt Lake City, Utah',
+city: 'Salt Lake City',
+state: 'Utah',
+services: 'New Sales,Used Sales,Bus Sales,Parts,Rapid Parts,Service,Xpress Check,Mobile Service,Oil & Coolant Analysis,DPF Cleaning,Collision,Finance,Insurance',
+certifications: 'Allison,Cummins,CAT,International,Maxxforce,Fuso,Eaton',
+contact: 'local:1-801-972-5320,tollfree:888-497-0770,parts:1-801-303-5250,service:1-801-303-5250,sales:1-801-303-5220,fax:801-972-7180',
+lat: '40.748386',
+long: '-111.984177'
+}
+];
+
+// function GetMap() {
+//   const infoboxTemplate = '<div class="map__infobox"><div class="map__infobox__title">{title}</div>{address}</div>';
+//   var map = new Microsoft.Maps.Map('#myMap', {
+//       // credentials: 'Ai6Wqz6EzFaqDKWV7iiiPcAQ78oLlYIS38oJXl4OqSjd0KHmyHGZ3bpWAkGKPSSO',
+//       // center: new Microsoft.Maps.Location(47.6149, -122.1941)
+//       zoom: 4
+//   });
+
+//   //Create an infobox at the center of the map but don't show it.
+//   infobox = new Microsoft.Maps.Infobox(map.getCenter(), {
+//     visible: false
+//   });
+
+//   //Assign the infobox to a map instance.
+//   infobox.setMap(map);
+
+//   var center = map.getCenter();
+
+//   for (let i = 0; i < locations.length; i++) {
+//     const pin = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(locations[i].lat, locations[i].long), {
+//         title: locations[i].title,
+//         text: 1
+//     });
+
+//     pin.metadata = {
+//       title: locations[i].title,
+//       address: locations[i].address
+//     };
+
+//     //Add a click event handler to the pushpin.
+//     Microsoft.Maps.Events.addHandler(pin, 'click', pushpinClicked);
+
+//     //Add the pushpin to the map
+//     map.entities.push(pin);
+//   }
+
+//   function pushpinClicked(e) {
+//     //Make sure the infobox has metadata to display.
+//     if (e.target.metadata) {
+//       //Set the infobox options with the metadata of the pushpin.
+//       infobox.setOptions({
+//         location: e.target.getLocation(),
+//         title: e.target.metadata.title,
+//         description: e.target.metadata.description,
+//         htmlContent: infoboxTemplate.replace('{title}', e.target.metadata.title).replace('{address}', e.target.metadata.address),
+//         visible: true
+//       });
+//     }
+//   }
+// }
+// function listStores() {
+// locations.forEach(location => {
+// const storeContainer = document.createElement('div');
+// storeContainer.textContent = location.title;
+// // var name = storeName.createTextNode(location.name);
+// // storeContainer.appendChild(storeName);
+// var app = document.querySelector('.store-list');
+// app.appendChild(storeContainer);
+// })
+// }
+// listStores();
+
+var map, dataLayer, infobox, searchManager;
+// URL to the data source that powers the locator. 
+var dataSourceUrl = 'http://spatial.virtualearth.net/REST/v1/data/15cbb4f6ee6e419f835cda92e7fbeb18/rush-location-data/RushLocationData';
+// A setting for specifying the distance units displayed. Possible values are 'km' and 'mi'. 
+var distanceUnits = 'mi';
+function GetMap() {
+    // Load the map. 
+    map = new Microsoft.Maps.Map('#myMap', {
+        zoom: 4.5
+    });
+    // Create a layer to load pushpins to. 
+    dataLayer = new Microsoft.Maps.Layer();
+    // Add a click event to the data layer to display an infobox. 
+    Microsoft.Maps.Events.addHandler(dataLayer, 'click', function (e) {
+        displayInfobox(e.primitive);
+    });
+    map.layers.insert(dataLayer);
+    // Create a global infobox control. 
+    infobox = new Microsoft.Maps.Infobox(new Microsoft.Maps.Location(0, 0), {
+        visible: false,
+        offset: new Microsoft.Maps.Point(0, 20),
+        height: 170,
+        width: 230
+    });
+    infobox.setMap(map);
+    // Load the Search, Spatial Data Service and Spatial Math modules.
+    Microsoft.Maps.loadModule(['Microsoft.Maps.Search', 'Microsoft.Maps.SpatialDataService', 'Microsoft.Maps.SpatialMath'], function () {
+        searchManager = new Microsoft.Maps.Search.SearchManager(map);
+        performSearch(true);
+    });
+    Microsoft.Maps.loadModule('Microsoft.Maps.AutoSuggest', function () {
+            var manager = new Microsoft.Maps.AutosuggestManager({ map: map });
+            manager.attachAutosuggest('#searchBox', '#searchBoxContainer', selectedSuggestion);
+        });
+    document.getElementById('searchBtn').onclick = performSearch();
+    document.getElementById('searchBox').onkeypress = e => {
+        if (e.which == 13) {
+            performSearch();
+        }
+    };
+}
+
+function selectedSuggestion(result) {
+  //Remove previously selected suggestions from the map.
+  map.entities.clear();
+
+  //Show the suggestion as a pushpin and center map over it.
+  var pin = new Microsoft.Maps.Pushpin(result.location);
+  map.entities.push(pin);
+  map.setView({ bounds: result.bestView });
+}
+
+function applyFilters() {
+  const filterList = [
+    'services_newSales',
+    'services_usedSales',
+    'services_busSales',
+    'services_refuseSales'
+  ];
+  const filters = [];
+
+  for (i = 0; i < filterList.length; i++) {
+    if (document.getElementById(filterList[i]).checked) {
+      filters.push(filterList[i]);
+    }
+  }
+  performSearch(true, filters);
+}
+
+function performSearch(isInitial, filters) {
+  clearMap();
+  const userValue = document.getElementById('searchBox').value;
+  // Create a request to geocode the users search. 
+  var geocodeRequest = {
+    where: isInitial || userValue === '' ? 'usa' : userValue,
+    count: 100,
+    callback: function (r) {
+      if (r && r.results &&
+        r.results.length > 0 &&
+        r.results[0].location) {
+        findNearbyLocations(r.results[0].location, isInitial, filters);
+      } else {
+        showErrorMsg('Unable to geocode query');
+      }
+    },
+    errorCallback: function () {
+      showErrorMsg('Unable to geocode query');
+    }
+  };
+  // Geocode the users search.
+  searchManager.geocode(geocodeRequest);
+}
+
+// A simple function for displaying error messages in the app.
+function showErrorMsg(msg) {
+  document.getElementById('resultsPanel').innerHTML = '<span class="errorMsg">' + msg + '</span>';
+}
+
+// A simple function for clearing the map and results panel.
+function clearMap() {
+  dataLayer.clear();
+  infobox.setOptions({ visible: false });
+  document.getElementById('resultsPanel').innerHTML = '';
+}
+
+// A function that searches for nearby locations against the data source. 
+function findNearbyLocations(location, isInitial, filters) {
+    // Create the query to get the 10 closest stores that are within 20KM of the specified location. 
+    var queryOptions = {
+      queryUrl: dataSourceUrl,
+      spatialFilter: isInitial ?
+        {
+          spatialFilterType: 'intersects',
+          intersects: map.getBounds()
+        }
+          :
+        {
+          spatialFilterType: 'nearby',
+          location: location,
+          radius: 200
+        },
+      top: 100
+    };
+    //Process the query.
+    Microsoft.Maps.SpatialDataService.QueryAPIManager.search(queryOptions, map, function (results) {
+        // Create an array to store the coordinates of all the location results. 
+        var locs = [];
+        // Create an array to store the HTML used to generate the list of results. 
+        // By using an array to concatenate strings is much more efficient than using +. 
+        var listItems = [];
+        
+        // sort results by distance from user location
+        results.sort((a, b) => (convertSdsDistance(a.metadata.__Distance) > convertSdsDistance(b.metadata.__Distance)) ? 1 : -1);
+
+        console.log(results.length)
+        
+        if (filters && filters.length > 0) {
+          for (i = 0; i < filters.length; i++) {
+            results = results.filter(result => {
+              console.log(result.metadata[filters[i]]);
+              return result.metadata[filters[i]] === true;
+              }
+            );
+          }
+        }
+        
+        console.log(results.length)
+
+        listItems.push(`<div class="map__result-count">${results.length} Results</div>`);
+
+        //Loop through results and add to map
+        for (var i = 0; i < results.length; i++) {
+          results[i].setOptions({
+            icon: 'images/red_pin.png',
+            text: (i + 1) + ''
+          });
+          // Add the location of the pushpin to the array of locations
+          locs.push(results[i].getLocation());
+
+          // Create the HTML for a single list item for the result.
+
+          //Get metadata for location
+          var metadata = results[i].metadata;
+          // Store the result ID as a property of the name. This will allow us to relate the list item to the pushpin on the map.
+          listItems.push('<div class="map__result">');
+          listItems.push(`<div class="map__count">${i + 1}</div>`);
+          listItems.push(`<div class="map__result__title"><a class="title" href="javascript:void(0);" rel="${metadata.EntityID}">${metadata.Title}</a></div>`);
+          listItems.push(`<div class="map__result__distance">${convertSdsDistance(metadata.__Distance)} ${distanceUnits}</div>`);
+          listItems.push(`<div class="map__result__address">${metadata.AddressLine}<br/>${metadata.Locality}, ${metadata.AdminDistrict} ${metadata.PostalCode}</div>`);
+          listItems.push(`<div class="map__result__directions"><a target="_blank" href="http://bing.com/maps/default.aspx?rtp=~pos.${metadata.Latitude}_${metadata.Longitude}_${encodeURIComponent(metadata.Title)}">Directions</a></div>`);
+          listItems.push('</div>');
+        }
+        // Add the pushpins to the map. 
+        dataLayer.add(results);
+        // Use the array of locations from the results to set the map view to show all locations. 
+        if (locs.length > 1) {
+            map.setView({ bounds: Microsoft.Maps.LocationRect.fromLocations(locs), padding: 80 });
+        }
+        else {
+            map.setView({ center: locs[0], zoom: 15 });
+        }
+        var resultsPanel = document.getElementById('resultsPanel');
+        // Add the list items to the results panel. 
+        resultsPanel.innerHTML = listItems.join('');
+        // Add a click event to the title of each list item. 
+        var resultItems = resultsPanel.getElementsByClassName('title');
+        for (var i = 0; i < resultItems.length; i++) {
+            resultItems[i].onclick = resultClicked;
+        }
+    });
+}
+function resultClicked(e) {
+    // Get the ID of the selected location 
+    var id = e.target.getAttribute('rel');
+    //Loop through all the pins in the data layer and find the pushpin for the location. 
+    var pins = dataLayer.getPrimitives();
+    for (var i = 0; i < pins.length; i++) {
+        var pin = pins[i];
+        if (pin.metadata.EntityID != id) {
+            pin = null;
+        }
+        else {
+            break;
+        }
+    }
+    // If a pin is found with a matching ID, then center the map on it and show it's infobox. 
+    if (pin) {
+        // Offset the centering to account for the infobox. 
+        map.setView({ center: pin.getLocation(), zoom: 15 });
+        displayInfobox(pin);
+    }
+}
+// Takes a pushpin and generates the content for the infobox from the Metadata and displays the infobox. 
+function displayInfobox(pin) {
+    var metadata = pin.metadata;
+    var desc = [];
+    desc.push(`<div class="map__description">`);
+    desc.push(`<div class="map__description__title">${metadata.Title}</div>`);
+    desc.push(`<div class="map__description__address">${metadata.AddressLine}<br />${metadata.Locality}, ${metadata.AdminDistrict}</div>`);
+    desc.push(`<div class="map__description__phone">${metadata.PhoneLocal}</div>`);
+    desc.push(`<div class="map__description__directions"><a target="_blank" href="http://bing.com/maps/default.aspx?rtp=~pos.${metadata.Latitude}_${metadata.Longitude}_${encodeURIComponent(metadata.Title)}">Directions</a>`);
+    desc.push(`<div class="map__description__services">`);
+      desc.push(`<div class="map__description__services__header">Services:</div>`);
+      desc.push(`<div class="map__description__services__service">New Sales</div>`);
+      desc.push(`<div class="map__description__services__offered">${metadata.services_newSales ? 'Yes' : 'No'}</div>`);
+      desc.push(`<div class="map__description__services__service">Used Sales</div>`);
+      desc.push(`<div class="map__description__services__offered">${metadata.services_usedSales ? 'Yes' : 'No'}</div>`);
+      desc.push(`<div class="map__description__services__service">Bus Sales</div>`);
+      desc.push(`<div class="map__description__services__offered">${metadata.services_busSales ? 'Yes' : 'No'}</div>`);
+      desc.push(`<div class="map__description__services__service">Refuse Sales</div>`);
+      desc.push(`<div class="map__description__services__offered">${metadata.services_refuseSales ? 'Yes' : 'No'}</div>`);
+    desc.push(`</div>`);
+    desc.push(`</div>`);
+    // desc.push('<tr><td><b>Hours:</b></td><td>', formatTime(metadata.Open), ' - ', formatTime(metadata.Close), '</td></tr>');
+    infobox.setOptions({ visible: true, location: pin.getLocation(), title: metadata.Name, description: desc.join('') });
+}
+// Formats a time in 1000 hours to hh:mm AM/PM format 
+function formatTime(val) {
+    var minutes = val % 100;
+    var hours = Math.round(val / 100);
+    if (minutes == 0) {
+        minutes = '00';
+    }
+    if (hours > 12) {
+        return (hours - 12) + ':' + minutes + 'PM';
+    }
+    else {
+        return hours + ':' + minutes + 'AM';
+    }
+}
+function convertSdsDistance(distance) {
+    var toUnits;
+    switch (distanceUnits.toLowerCase()) {
+        case 'mi':
+        case 'miles':
+            toUnits = Microsoft.Maps.SpatialMath.DistanceUnits.Miles;
+            break;
+        case 'km':
+        case 'kilometers':
+        default:
+            toUnits = Microsoft.Maps.SpatialMath.DistanceUnits.Kilometers;
+            break;
+    }
+    //Convert distance to disired units.
+    var d = Microsoft.Maps.SpatialMath.convertDistance(distance, Microsoft.Maps.SpatialMath.DistanceUnits.Kilometers, toUnits);
+    //Round to to 2 decimal places.
+    d = Math.round(d * 100) / 100;
+    return d;
+}
+</script>
+  </body>
+</html>

@@ -14,14 +14,28 @@
             <div id="searchBoxContainer" class="searchBar">
                 <input id="searchBox" type="text" value="" />
                 <input id="searchBtn" type="button" value="Search" />
+                <input id="clearBtn" type="button" value="Clear" />
             </div>
+
             <div class="filters">
               <form>
+                <fieldset>
+                  <select id="radius-select" name="radius">
+                      <option value="">Select Search Radius</option>
+                      <option value="8.05">Search within 5 miles</option>
+                      <option value="16.09">Search within 10 miles</option>
+                      <option value="32.19">Search within 20 miles</option>
+                      <option value="80.47">Search within 50 miles</option>
+                      <option value="160.93" selected="selected">Search within 100 miles</option>
+                      <option value="804.67">Search within 500 miles</option>
+                  </select>
+                </fieldset>
                 <fieldset><input type="checkbox" id="services_newSales" value="services_newSales" /> <label for="services_newSales">New Sales</label></fieldset>
                 <fieldset><input type="checkbox" id="services_usedSales" value="services_usedSales" /> <label for="services_usedSales">Used Sales</label></fieldset>
                 <fieldset><input type="checkbox" id="services_busSales" value="services_busSales" /> <label for="services_busSales">Bus Sales</label></fieldset>
                 <fieldset><input type="checkbox" id="services_refuseSales" value="services_refuseSales" /> <label for="services_refuseSales">Refuse Sales</label></fieldset>
-                <button type="button" onclick="applyFilters()">Apply Filters</button>
+                <button type="button" onclick="performSearch()">Apply Filters</button>
+                <button type="button" onclick="clearFilters()">Clear Filters</button>
               </form>
             </div>
             <div id="resultsPanel"></div>
@@ -358,10 +372,14 @@ function GetMap() {
         performSearch(true);
     });
     Microsoft.Maps.loadModule('Microsoft.Maps.AutoSuggest', function () {
-            var manager = new Microsoft.Maps.AutosuggestManager({ map: map });
-            manager.attachAutosuggest('#searchBox', '#searchBoxContainer', selectedSuggestion);
-        });
-    document.getElementById('searchBtn').onclick = performSearch();
+      var manager = new Microsoft.Maps.AutosuggestManager({ map: map });
+      manager.attachAutosuggest('#searchBox', '#searchBoxContainer', selectedSuggestion);
+    });
+    document.getElementById('searchBtn').onclick = performSearch;
+    document.getElementById('clearBtn').onclick = () => {
+      document.getElementById('searchBox').value = '';
+      performSearch();
+    };
     document.getElementById('searchBox').onkeypress = e => {
         if (e.which == 13) {
             performSearch();
@@ -379,7 +397,7 @@ function selectedSuggestion(result) {
   map.setView({ bounds: result.bestView });
 }
 
-function applyFilters() {
+function getFilters() {
   const filterList = [
     'services_newSales',
     'services_usedSales',
@@ -388,15 +406,39 @@ function applyFilters() {
   ];
   const filters = [];
 
+
+  // add filters to search criteria
   for (i = 0; i < filterList.length; i++) {
     if (document.getElementById(filterList[i]).checked) {
       filters.push(filterList[i]);
     }
   }
-  performSearch(true, filters);
+
+  // add radius to search criteria
+  if (document.getElementById('radius-select').value) {
+    radius = document.getElementById('radius-select').value;
+  } else {
+    radius = null;
+  }
+
+  return filters;
 }
 
-function performSearch(isInitial, filters) {
+function clearFilters() {
+  document.getElementById('radius-select').value = '';
+  const filterList = [
+    'services_newSales',
+    'services_usedSales',
+    'services_busSales',
+    'services_refuseSales'
+  ];
+
+  // add filters to search criteria
+  filterList.forEach(filter => document.getElementById(filter).checked = false);
+  performSearch();
+}
+
+function performSearch(isInitial) {
   clearMap();
   const userValue = document.getElementById('searchBox').value;
   // Create a request to geocode the users search. 
@@ -407,7 +449,7 @@ function performSearch(isInitial, filters) {
       if (r && r.results &&
         r.results.length > 0 &&
         r.results[0].location) {
-        findNearbyLocations(r.results[0].location, isInitial, filters);
+        findNearbyLocations(r.results[0].location, isInitial);
       } else {
         showErrorMsg('Unable to geocode query');
       }
@@ -432,22 +474,27 @@ function clearMap() {
   document.getElementById('resultsPanel').innerHTML = '';
 }
 
-// A function that searches for nearby locations against the data source. 
-function findNearbyLocations(location, isInitial, filters) {
-    // Create the query to get the 10 closest stores that are within 20KM of the specified location. 
+// A function that searches for nearby locations against the data source.
+function findNearbyLocations(location, isInitial) {
+
+    const filters = getFilters();
+
+  console.log(`filters: ${filters}, radius: ${radius}, location: ${location}`);
+
     var queryOptions = {
       queryUrl: dataSourceUrl,
-      spatialFilter: isInitial ?
-        {
-          spatialFilterType: 'intersects',
-          intersects: map.getBounds()
-        }
-          :
-        {
-          spatialFilterType: 'nearby',
-          location: location,
-          radius: 200
-        },
+      spatialFilter:
+        document.getElementById('radius-select').value === '' ?
+          {
+            spatialFilterType: 'intersects',
+            intersects: map.getBounds()
+          }
+        :
+          {
+            spatialFilterType: 'nearby',
+            location: location,
+            radius: document.getElementById('radius-select').value
+          },
       top: 100
     };
     //Process the query.
@@ -461,6 +508,8 @@ function findNearbyLocations(location, isInitial, filters) {
         // sort results by distance from user location
         results.sort((a, b) => (convertSdsDistance(a.metadata.__Distance) > convertSdsDistance(b.metadata.__Distance)) ? 1 : -1);
 
+        console.log(results.length);
+
         if (filters && filters.length > 0) {
           for (i = 0; i < filters.length; i++) {
             results = results.filter(result => {
@@ -469,6 +518,8 @@ function findNearbyLocations(location, isInitial, filters) {
             );
           }
         }
+
+        console.log(results.length);
 
         listItems.push(`<div class="map__result-count">${results.length} Results</div>`);
 
@@ -494,23 +545,36 @@ function findNearbyLocations(location, isInitial, filters) {
           listItems.push(`<div class="map__result__directions"><a target="_blank" href="http://bing.com/maps/default.aspx?rtp=~pos.${metadata.Latitude}_${metadata.Longitude}_${encodeURIComponent(metadata.Title)}">Directions</a></div>`);
           listItems.push('</div>');
         }
-        // Add the pushpins to the map. 
+        // Add the pushpins to the map.
         dataLayer.add(results);
-        // Use the array of locations from the results to set the map view to show all locations. 
+
+        // Use the array of locations from the results to set the map view to show all locations.
         if (locs.length > 1) {
             map.setView({ bounds: Microsoft.Maps.LocationRect.fromLocations(locs), padding: 80 });
         }
         else {
             map.setView({ center: locs[0], zoom: 15 });
         }
+
         var resultsPanel = document.getElementById('resultsPanel');
-        // Add the list items to the results panel. 
+
+        // Add the list items to the results panel.
         resultsPanel.innerHTML = listItems.join('');
-        // Add a click event to the title of each list item. 
+
+        // Add a click event to the title of each list item.
         var resultItems = resultsPanel.getElementsByClassName('title');
         for (var i = 0; i < resultItems.length; i++) {
             resultItems[i].onclick = resultClicked;
         }
+
+        // set view to bounds of results
+        if (results.length == 1) {
+            bounds = results[0].bestView;
+        } else {
+            //Use the locations from the results to calculate a bounding box.
+            // bounds = Microsoft.Maps.LocationRect.fromLocations(locs);
+        }
+        // map.setView({ bounds: bounds });
     });
 }
 function resultClicked(e) {

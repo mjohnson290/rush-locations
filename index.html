@@ -457,23 +457,18 @@ function findNearbyLocations(location, isInitial, filters) {
         // Create an array to store the HTML used to generate the list of results. 
         // By using an array to concatenate strings is much more efficient than using +. 
         var listItems = [];
-        
+
         // sort results by distance from user location
         results.sort((a, b) => (convertSdsDistance(a.metadata.__Distance) > convertSdsDistance(b.metadata.__Distance)) ? 1 : -1);
 
-        console.log(results.length)
-        
         if (filters && filters.length > 0) {
           for (i = 0; i < filters.length; i++) {
             results = results.filter(result => {
-              console.log(result.metadata[filters[i]]);
               return result.metadata[filters[i]] === true;
               }
             );
           }
         }
-        
-        console.log(results.length)
 
         listItems.push(`<div class="map__result-count">${results.length} Results</div>`);
 
